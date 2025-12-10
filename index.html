@@ -16,25 +16,22 @@
         /* Romeinse achtergrond: marmer-textuur + layered gradients */
         body {
             font-family: "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
-
             background-image:
                 url("images/marmer.jpg"),
                 radial-gradient(circle at 0 0, rgba(255,255,255,0.35), transparent 55%),
                 radial-gradient(circle at 100% 100%, rgba(255,255,255,0.2), transparent 55%),
                 linear-gradient(135deg, rgba(196,178,143,0.25), rgba(242,238,230,0.9));
-
             background-repeat: repeat, no-repeat, no-repeat, no-repeat;
             background-size: auto, auto, auto, auto;
-
             color: #2b2115;
             margin: 0;
-            padding-bottom: 50px;
+            padding-bottom: 70px;
         }
 
         header {
             background: linear-gradient(135deg, #5c0000, #8c1515);
             color: #fdf7e6;
-            padding: 18px 16px 10px;
+            padding: 18px 16px 10px 16px;
             text-align: center;
             border-bottom: 3px solid #c9aa71;
             position: sticky;
@@ -53,6 +50,20 @@
             color: #f3e1b8;
         }
 
+        /* Dark mode toggle */
+        #dark-toggle {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 999px;
+            border: 1px solid #f3e1b8;
+            background: rgba(0,0,0,0.2);
+            color: #fdf7e6;
+            cursor: pointer;
+        }
+
         /* Dag-navigatie-balk */
         .day-nav {
             display: flex;
@@ -60,6 +71,7 @@
             margin: 8px 10px 4px;
             overflow-x: auto;
             padding-bottom: 4px;
+            justify-content: center;
         }
         .day-nav a {
             flex: 0 0 auto;
@@ -76,6 +88,22 @@
         }
         .day-nav a:hover {
             background: rgba(255,255,255,0.12);
+        }
+
+        /* Statusbalk voor weer + volgende activiteit */
+        .status-container {
+            margin-top: 6px;
+        }
+        .weather-bar,
+        .next-activity-bar {
+            max-width: 480px;
+            margin: 4px auto;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            line-height: 1.4;
+            background: rgba(0,0,0,0.18);
+            color: #fdf7e6;
         }
 
         .day {
@@ -141,6 +169,7 @@
         .btn {
             display: inline-block;
             margin-top: 8px;
+            margin-right: 4px;
             padding: 8px 13px;
             border-radius: 999px;
             background: #8c1515;
@@ -166,8 +195,78 @@
             border: 1px solid #d1c4a3;
         }
 
+        /* Highlight voor volgende activiteit */
+        .next-highlight {
+            box-shadow: 0 0 0 2px #c9aa71, 0 0 12px rgba(0,0,0,0.4);
+        }
+
+        /* Zwevende "Naar hotel"-knop */
+        .floating-hotel-btn {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: #8c1515;
+            color: #fdf7e6;
+            font-size: 13px;
+            font-weight: bold;
+            border: 1px solid #c9aa71;
+            text-decoration: none;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+            z-index: 300;
+        }
+
+        /* Dark mode */
+        body.dark-mode {
+            background-image: none;
+            background-color: #111;
+            color: #f4e9d5;
+        }
+        body.dark-mode header {
+            background: linear-gradient(135deg, #2b0000, #4a0808);
+            border-bottom-color: #8c1515;
+        }
+        body.dark-mode .day h2 {
+            color: #f4e9d5;
+            border-left-color: #c9aa71;
+        }
+        body.dark-mode .card {
+            background: #1b1b1b;
+            border-color: #444;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+        }
+        body.dark-mode .part {
+            color: #f1d28c;
+        }
+        body.dark-mode .time,
+        body.dark-mode .desc,
+        body.dark-mode .walk,
+        body.dark-mode .title {
+            color: #f4e9d5;
+        }
+        body.dark-mode .btn {
+            background: #c9aa71;
+            color: #2b2115;
+            border-color: #f4e9d5;
+        }
+        body.dark-mode .btn.secondary {
+            background: #33302a;
+            color: #f4e9d5;
+            border-color: #c9aa71;
+        }
+        body.dark-mode .weather-bar,
+        body.dark-mode .next-activity-bar {
+            background: rgba(0,0,0,0.7);
+        }
+        body.dark-mode .floating-hotel-btn {
+            background: #c9aa71;
+            color: #2b2115;
+            border-color: #f4e9d5;
+        }
+
         @media (max-width: 600px) {
-            body { padding-bottom: 70px; }
+            body { padding-bottom: 80px; }
         }
     </style>
 </head>
@@ -175,6 +274,8 @@
 <body>
 
 <header>
+    <button id="dark-toggle" type="button">Roma nocturna</button>
+
     <div class="main-title">Revisitatio ad Matrem Romam</div>
     <div class="subtitle">Itinerarium urbis · Residenza Ave Roma</div>
 
@@ -185,11 +286,14 @@
         <a href="#zaterdag">Zaterdag</a>
         <a href="#zondag">Zondag</a>
     </nav>
+
+    <div class="status-container">
+        <div id="weather" class="weather-bar">Weer in Rome wordt geladen…</div>
+        <div id="next-activity-bar" class="next-activity-bar">Volgende activiteit wordt bepaald…</div>
+    </div>
 </header>
 
-<!-- ────────────────────────────────────────────────
-     WOENSDAG
-─────────────────────────────────────────────────── -->
+<!-- WOENSDAG -->
 <div class="day" id="woensdag">
     <h2>Woensdag 17 december</h2>
 
@@ -198,6 +302,7 @@
         <div class="title">Stadswandeling</div>
         <img src="images/pantheon.jpg" alt="Pantheon">
         <div class="desc">Pantheon, Teatijns klooster, Piazza Navona, Santa Maria Maggiore.</div>
+        <a class="btn secondary" href="http://maps.apple.com/?q=Pantheon,Rome,Italy" target="_blank">Open in Maps</a>
         <div class="walk">Hotel → Pantheon: 0,8 km · 10 min</div>
     </div>
 
@@ -212,8 +317,9 @@
         <div class="part">Middag</div>
         <div class="title">Galleria Borghese</div>
         <img src="images/galleria-borghese.jpg" alt="Galleria Borghese">
-        <div class="time">14:00–16:00</div>
+        <div class="time" data-datetime="2025-12-17T14:00:00+01:00">14:00–16:00</div>
         <a class="btn" href="tickets galleria borghese.pdf" target="_blank">Open tickets</a>
+        <a class="btn secondary" href="http://maps.apple.com/?q=Galleria+Borghese,Rome,Italy" target="_blank">Open in Maps</a>
         <div class="walk">Lunch → Borghese: 2,2 km · 28 min</div>
         <div class="walk">Borghese → Hotel: 2,2 km · 28 min</div>
     </div>
@@ -221,15 +327,13 @@
     <div class="card">
         <div class="part">Diner</div>
         <div class="title">Osteria Barberini</div>
-        <div class="time">19:30 (gereserveerd)</div>
+        <div class="time" data-datetime="2025-12-17T19:30:00+01:00">19:30 (gereserveerd)</div>
         <a class="btn secondary" href="https://www.osteriabarberini.it/" target="_blank">Restaurantsite</a>
         <div class="walk">Hotel → Diner: 1,8 km · 23 min</div>
     </div>
 </div>
 
-<!-- ────────────────────────────────────────────────
-     DONDERDAG
-─────────────────────────────────────────────────── -->
+<!-- DONDERDAG -->
 <div class="day" id="donderdag">
     <h2>Donderdag 18 december</h2>
 
@@ -237,8 +341,9 @@
         <div class="part">Ochtend</div>
         <div class="title">Sint Pieter · Musei Vaticani · Sixtijnse Kapel</div>
         <img src="images/vaticaanse-musea.jpg" alt="Vaticaanse Musea">
-        <div class="time">09:00</div>
+        <div class="time" data-datetime="2025-12-18T09:00:00+01:00">09:00</div>
         <a class="btn" href="tickets musei vaticani.pdf" target="_blank">Open tickets</a>
+        <a class="btn secondary" href="http://maps.apple.com/?q=Vatican+Museums,Rome,Italy" target="_blank">Open in Maps</a>
         <div class="walk">Hotel → Musei Vaticani: 2,0 km · 25 min</div>
     </div>
 
@@ -253,8 +358,9 @@
         <div class="part">Middag</div>
         <div class="title">Palatijn · Forum Romanum · Colosseum · San Clemente</div>
         <img src="images/colosseum-forum.jpg" alt="Colosseum">
-        <div class="time">Colosseum 14:45</div>
+        <div class="time" data-datetime="2025-12-18T14:45:00+01:00">Colosseum 14:45</div>
         <a class="btn" href="Tickets colloseum en forum romanum.pdf" target="_blank">Open tickets</a>
+        <a class="btn secondary" href="http://maps.apple.com/?q=Colosseum,Rome,Italy" target="_blank">Open in Maps</a>
         <div class="walk">Lunch → Colosseum: 0,4 km · 5 min</div>
         <div class="walk">Colosseum → Hotel: 2,5 km · 32 min</div>
     </div>
@@ -262,15 +368,13 @@
     <div class="card">
         <div class="part">Diner</div>
         <div class="title">La Tavernelle</div>
-        <div class="time">19:45 (gereserveerd)</div>
+        <div class="time" data-datetime="2025-12-18T19:45:00+01:00">19:45 (gereserveerd)</div>
         <a class="btn secondary" href="https://letavernelle.it/en/restaurant/" target="_blank">Restaurantsite</a>
         <div class="walk">Hotel → Trastevere: 1,4 km · 18 min</div>
     </div>
 </div>
 
-<!-- ────────────────────────────────────────────────
-     VRIJDAG
-─────────────────────────────────────────────────── -->
+<!-- VRIJDAG -->
 <div class="day" id="vrijdag">
     <h2>Vrijdag 19 december</h2>
 
@@ -278,6 +382,7 @@
         <div class="part">Ochtend</div>
         <div class="title">Capitolijnse Musea</div>
         <img src="images/capitolijnse-musea.jpg" alt="Capitolijnse Musea">
+        <a class="btn secondary" href="http://maps.apple.com/?q=Capitoline+Museums,Rome,Italy" target="_blank">Open in Maps</a>
         <div class="walk">Hotel → Capitolijnse Musea: 1,3 km · 17 min</div>
     </div>
 
@@ -292,8 +397,9 @@
         <div class="part">Middag</div>
         <div class="title">Villa Farnesina</div>
         <img src="images/villa-farnesina.jpg" alt="Villa Farnesina">
-        <div class="time">14:30</div>
+        <div class="time" data-datetime="2025-12-19T14:30:00+01:00">14:30</div>
         <a class="btn" href="tickets villa farnesia.pdf" target="_blank">Open tickets</a>
+        <a class="btn secondary" href="http://maps.apple.com/?q=Villa+Farnesina,Rome,Italy" target="_blank">Open in Maps</a>
         <div class="walk">Lunch → Farnesina: 2,0 km · 25 min</div>
     </div>
 
@@ -306,9 +412,7 @@
     </div>
 </div>
 
-<!-- ────────────────────────────────────────────────
-     ZATERDAG
-─────────────────────────────────────────────────── -->
+<!-- ZATERDAG -->
 <div class="day" id="zaterdag">
     <h2>Zaterdag 20 december</h2>
 
@@ -316,7 +420,7 @@
         <div class="part">Ochtend</div>
         <div class="title">Catacomben van Sint Calixtus</div>
         <img src="images/catacomben-callistus.jpg" alt="Catacomben">
-        <div class="time">10:00 · Rondleiding</div>
+        <div class="time" data-datetime="2025-12-20T10:00:00+01:00">10:00 · Rondleiding</div>
         <div class="desc">
             OV vanaf Residenza Ave Roma:<br>
             • Loop ± 1,1 km naar Ara Coeli / Piazza Venezia.<br>
@@ -324,6 +428,7 @@
             • Uitstappen bij “Catacombe S. Callisto”.<br>
             Reistijd ca. 35–40 min.
         </div>
+        <a class="btn secondary" href="http://maps.apple.com/?q=Catacombe+di+San+Callisto,Rome,Italy" target="_blank">Open in Maps</a>
     </div>
 
     <div class="card">
@@ -337,8 +442,9 @@
         <div class="part">Middag</div>
         <div class="title">Galleria Doria Pamphilj</div>
         <img src="images/doria-pamphilj.jpg" alt="Doria Pamphilj">
-        <div class="time">15:00</div>
+        <div class="time" data-datetime="2025-12-20T15:00:00+01:00">15:00</div>
         <a class="btn" href="tickets doria pamphilj.pdf" target="_blank">Open tickets</a>
+        <a class="btn secondary" href="http://maps.apple.com/?q=Galleria+Doria+Pamphilj,Rome,Italy" target="_blank">Open in Maps</a>
         <div class="walk">Lunch → Doria Pamphilj: 1,0 km · 13 min</div>
         <div class="walk">Doria → Hotel: 0,8 km · 10 min</div>
     </div>
@@ -346,15 +452,13 @@
     <div class="card">
         <div class="part">Diner</div>
         <div class="title">Hosteria Grappolo d’Oro</div>
-        <div class="time">19:00 (gereserveerd)</div>
+        <div class="time" data-datetime="2025-12-20T19:00:00+01:00">19:00 (gereserveerd)</div>
         <a class="btn secondary" href="https://hosteriagrappolodoro.it/en/" target="_blank">Restaurantsite</a>
         <div class="walk">Hotel → Restaurant: 0,5 km · 6 min</div>
     </div>
 </div>
 
-<!-- ────────────────────────────────────────────────
-     ZONDAG
-─────────────────────────────────────────────────── -->
+<!-- ZONDAG -->
 <div class="day" id="zondag">
     <h2>Zondag 21 december</h2>
 
@@ -363,6 +467,7 @@
         <div class="title">Thermen van Caracalla · Castel Sant'Angelo · Palazzo Colonna</div>
         <img src="images/termen-caracalla.jpg" alt="Thermen van Caracalla">
         <div class="desc">Combinatie-ochtend; exacte volgorde bepalen jullie ter plekke.</div>
+        <a class="btn secondary" href="http://maps.apple.com/?q=Terme+di+Caracalla,Rome,Italy" target="_blank">Open in Maps</a>
         <div class="walk">Hotel → eerste bestemming: 3,0 km · 35 min</div>
     </div>
 
@@ -376,10 +481,11 @@
         <div class="part">Middag</div>
         <div class="title">Naar luchthaven Fiumicino</div>
         <img src="images/fiumicino-airport.jpg" alt="Luchthaven Fiumicino">
+        <div class="time" data-datetime="2025-12-21T20:25:00+01:00">Vlucht FCO → AMS: 20:25</div>
         <div class="desc">
-            Vlucht FCO → AMS: 20:25.<br>
             Taxi: 40–50 min · OV: 60–75 min vanaf hotel.
         </div>
+        <a class="btn secondary" href="http://maps.apple.com/?q=Rome+Fiumicino+Airport,Italy" target="_blank">Open in Maps</a>
     </div>
 
     <div class="card">
@@ -388,6 +494,128 @@
         <div class="desc">Praktisch: eten op de luchthaven of in het vliegtuig.</div>
     </div>
 </div>
+
+<!-- Zwevende "Naar hotel"-knop -->
+<a class="floating-hotel-btn"
+   href="http://maps.apple.com/?q=Residenza+Ave+Roma,Rome,Italy"
+   target="_blank">
+    Naar hotel
+</a>
+
+<script>
+    // ------- Dark mode toggle -------
+    const darkToggle = document.getElementById('dark-toggle');
+    function applyDarkMode(on) {
+        document.body.classList.toggle('dark-mode', on);
+        localStorage.setItem('rome-dark-mode', on ? '1' : '0');
+        darkToggle.textContent = on ? 'Roma diurna' : 'Roma nocturna';
+    }
+    const savedDark = localStorage.getItem('rome-dark-mode') === '1';
+    applyDarkMode(savedDark);
+    darkToggle.addEventListener('click', () => {
+        const isOn = document.body.classList.contains('dark-mode');
+        applyDarkMode(!isOn);
+    });
+
+    // ------- Weer in Rome (Open-Meteo, geen API key nodig) -------
+    const weatherEl = document.getElementById('weather');
+    if (weatherEl) {
+        fetch('https://api.open-meteo.com/v1/forecast?latitude=41.9&longitude=12.5&current_weather=true&timezone=Europe%2FRome')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.current_weather) throw new Error('Geen weerdata');
+                const cw = data.current_weather;
+                const temp = Math.round(cw.temperature);
+                const wind = Math.round(cw.windspeed);
+                const code = cw.weathercode;
+
+                function weatherText(code) {
+                    if (code === 0) return 'helder';
+                    if (code === 1 || code === 2) return 'meest helder';
+                    if (code === 3) return 'bewolkt';
+                    if (code >= 45 && code <= 48) return 'mistig';
+                    if (code >= 51 && code <= 67) return 'motregen';
+                    if (code >= 71 && code <= 77) return 'sneeuw';
+                    if (code >= 80 && code <= 82) return 'buien';
+                    if (code >= 95) return 'onweersbuien';
+                    return 'onbekend weer';
+                }
+
+                const desc = weatherText(code);
+                weatherEl.textContent = `Rome · ${temp}°C · ${desc} · wind ${wind} km/u`;
+            })
+            .catch(() => {
+                weatherEl.textContent = 'Weer: niet beschikbaar (offline)';
+            });
+    }
+
+    // ------- Activiteitenlijst + countdown -------
+
+    const activityItems = [];
+    document.querySelectorAll('.card .time[data-datetime]').forEach(el => {
+        const dtStr = el.getAttribute('data-datetime');
+        const when = new Date(dtStr);
+        if (isNaN(when)) return;
+        const card = el.closest('.card');
+        const titleEl = card.querySelector('.title');
+        const dayEl = card.closest('.day')?.querySelector('h2');
+        activityItems.push({
+            when,
+            card,
+            title: titleEl ? titleEl.textContent.trim() : 'Activiteit',
+            dayLabel: dayEl ? dayEl.textContent.trim() : ''
+        });
+    });
+    activityItems.sort((a, b) => a.when - b.when);
+
+    const nextBar = document.getElementById('next-activity-bar');
+    let lastHighlight = null;
+
+    function updateNextActivity() {
+        if (!nextBar || activityItems.length === 0) return;
+        const now = new Date();
+        let next = activityItems.find(a => a.when > now);
+        if (!next) {
+            const last = activityItems[activityItems.length - 1];
+            nextBar.textContent = `Laatste activiteit was: ${last.title} (${last.dayLabel}).`;
+            if (lastHighlight) lastHighlight.classList.remove('next-highlight');
+            return;
+        }
+
+        const diffMs = next.when - now;
+        const totalSec = Math.max(0, Math.round(diffMs / 1000));
+        const hours = Math.floor(totalSec / 3600);
+        const minutes = Math.floor((totalSec % 3600) / 60);
+
+        const parts = [];
+        if (hours > 0) parts.push(`${hours} u`);
+        parts.push(`${minutes} min`);
+
+        const timeStr = next.when.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+        nextBar.textContent = `Volgende activiteit: ${next.title} (${next.dayLabel}, ${timeStr}) over ${parts.join(' ')}`;
+
+        if (lastHighlight) lastHighlight.classList.remove('next-highlight');
+        lastHighlight = next.card;
+        lastHighlight.classList.add('next-highlight');
+    }
+
+    updateNextActivity();
+    setInterval(updateNextActivity, 30000);
+
+    // ------- Bij openen: automatisch naar "relevante" dag scrollen -------
+    window.addEventListener('load', () => {
+        if (activityItems.length === 0) return;
+        const now = new Date();
+        let target = activityItems.find(a => a.when > now);
+        if (!target) {
+            target = activityItems[activityItems.length - 1];
+        }
+        const dayDiv = target.card.closest('.day');
+        if (dayDiv) {
+            dayDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+</script>
 
 </body>
 </html>
